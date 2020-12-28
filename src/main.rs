@@ -1,22 +1,22 @@
 pub mod compress;
+pub mod file_io;
 
 use bincode;
-use std::fs::File;
-use std::io::prelude::*;
 
 fn main() {
-    let mut s = String::from("sdf");
-    let compressed_vector: Vec<u32> = compress::compress(64, &mut s);
-
-    let encoded: Vec<u8> = bincode::serialize(&compressed_vector).unwrap();
-
+    let file_name = "testFile";
+    let mut compressed_vector: Vec<u32> = Vec::new();
     {
-        let mut file = File::create("testFile").unwrap();
-        file.write_all(&encoded);
-        file.sync_all().unwrap();
-    }
+        let mut s =
+            String::from("this is some random teasdsdfijgahfgasdfhgsalhflsdst. JIAghfbfibsEILYFGSJIAghfbfibsEILYFGSBLAIDFGH");
 
-    for i in compressed_vector.iter() {
-        println!("{:b}", i);
+        compressed_vector = compress::compress(64, &mut s);
+
+        let encoded: Vec<u8> = bincode::serialize(&compressed_vector).unwrap();
+
+        file_io::write_to_file(&encoded, file_name);
     }
+    let unencoded = file_io::read_from_file_deserialized(file_name);
+
+    assert_eq!(unencoded, compressed_vector);
 }
