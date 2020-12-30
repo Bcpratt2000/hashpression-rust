@@ -1,22 +1,27 @@
 pub mod compress;
 pub mod file_io;
+pub mod decompress;
 
 use bincode;
 
 fn main() {
-    let file_name = "testFile";
+    let FILE_NAME = "testFile";
+    let BLOCK_SIZE = 3;
+
     let mut compressed_vector: Vec<u32> = Vec::new();
     {
         let mut s =
-            String::from("this is some random teasdsdfijgahfgasdfhgsalhflsdst. JIAghfbfibsEILYFGSJIAghfbfibsEILYFGSBLAIDFGH");
+            String::from("Hello,\nWorld!");
 
-        compressed_vector = compress::compress(64, &mut s);
+        compressed_vector = compress::compress(BLOCK_SIZE, &mut s);
 
-        let encoded: Vec<u8> = bincode::serialize(&compressed_vector).unwrap();
+        let serialized: Vec<u8> = bincode::serialize(&compressed_vector).unwrap();
 
-        file_io::write_to_file(&encoded, file_name);
+        file_io::write_vec8_to_file(&serialized, FILE_NAME);
     }
-    let unencoded = file_io::read_from_file_deserialized(file_name);
+    let deserialized = file_io::read_from_file_deserialized(FILE_NAME);
 
-    assert_eq!(unencoded, compressed_vector);
+    assert_eq!(deserialized, compressed_vector);
+
+    println!("{}", String::from_utf8_lossy(decompress::decompress(&deserialized, BLOCK_SIZE).as_slice()));
 }

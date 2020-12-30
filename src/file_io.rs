@@ -18,7 +18,7 @@ pub fn read_from_file_deserialized(file: &str) -> Vec<u32> {
     deserialized
 }
 
-pub fn write_to_file(data: &Vec<u8>, file: &str) {
+pub fn write_vec8_to_file(data: &Vec<u8>, file: &str) {
     let mut file: File = File::create(file).unwrap();
     file.write_all(data).unwrap();
     file.sync_all().unwrap();
