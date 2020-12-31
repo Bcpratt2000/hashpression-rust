@@ -2,13 +2,14 @@ pub mod compress;
 pub mod decompress;
 pub mod file_io;
 
-use bincode;
+use std::time::Instant;
 
 fn main() {
-    let FILE_NAME = "testFile.hps";
-    let BLOCK_SIZE = 3;
+    const FILE_NAME: &str = "testFile.hps";
+    const BLOCK_SIZE: usize = 3;
     {
-        let mut to_compress: Vec<u8> = file_io::read_from_file("English.txt");
+        let mut to_compress: Vec<u8> = file_io::read_from_file("EnglishShortened.txt");
+        // let mut to_compress: Vec<u8> = String::from("Hello, world!").into_bytes();
 
         let compressed: Vec<u32> = compress::compress(BLOCK_SIZE, &mut to_compress);
 
@@ -17,7 +18,9 @@ fn main() {
 
     let from_file = file_io::read_from_file_deserialized(FILE_NAME);
 
+    let start = Instant::now();
     let decompressed = decompress::decompress(&from_file, BLOCK_SIZE);
+    println!("Seconds to decompress: {}", start.elapsed().as_millis() as f64/1000 as f64);
 
-    println!("{}", String::from_utf8_lossy(&decompressed));
+    println!("{}", String::from_utf8(decompressed).unwrap());
 }

@@ -1,5 +1,5 @@
-use hash32::FnvHasher;
-use hash32::Hasher;
+use crc32fast::Hasher;
+
 
 pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
     //pad end with spaces to be divisible by block_size
@@ -15,16 +15,16 @@ pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
 
     for i in 0..(input_vector.len() / block_size) {
         //initalize hasher every loop because hasher.finish() does not clear it
-        hasher = FnvHasher::default();
+        hasher = Hasher::new();
 
         //write block to hash to hasher
-        hasher.write(
+        hasher.update(
             input_vector
                 .get(block_size * i..block_size * i + block_size)
                 .unwrap(),
         );
         //write hash as a new entry in the vector
-        to_ret.push(hasher.finish());
+        to_ret.push(hasher.finalize());
     }
     to_ret
 }

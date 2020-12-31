@@ -1,69 +1,79 @@
+use crc32fast::Hasher;
+use rand::Rng;
 use std::{thread::current, vec};
 
-use hash32::FnvHasher;
-use hash32::Hasher;
-use rand::Rng;
-
 pub fn decompress(compressed_data: &Vec<u32>, block_size: usize) -> Vec<u8> {
-    let mut hasher: FnvHasher; // = FnvHasher::default();
+    let mut hasher: Hasher;
 
-    // let mut decompressed_data: Vec<u8> = Vec::with_capacity(block_size * compressed_data.len());
-    let mut decompressed_data: Vec<u8> = vec!(0; block_size * compressed_data.len());
+    let mut decompressed_data: Vec<u8> = vec![0; block_size * compressed_data.len()];
 
     let mut current_hash: u32 = 0;
     let mut current_bytes: Vec<u8> = vec![0; block_size];
-    while increment_byte_vector(&mut current_bytes) {
-        hasher = FnvHasher::default();
-        hasher.write(current_bytes.as_slice());
-        current_hash = hasher.finish();
-        for (i, item) in compressed_data.iter().enumerate(){
-            if current_hash == *item{
-                for ii in 0..block_size{
-                    decompressed_data[i+ii] = current_bytes[ii];
+
+    let mut matches: usize = 0;
+
+    loop {
+        hasher = Hasher::new();
+        hasher.update(current_bytes.as_slice());
+        current_hash = hasher.finalize();
+        for (i, item) in compressed_data.iter().enumerate() {
+            if current_hash == *item {
+                for ii in 0..block_size {
+                    decompressed_data[(i * block_size) + ii] = current_bytes[ii];
                 }
-                println!("{:?}", current_bytes);
+                // println!("{:?}", current_bytes);
+                matches += 1;
             }
+        }
+        if !increment_byte_vector(&mut current_bytes) {
+            break;
         }
     }
 
+    println!(
+        "Avg matches per hash: {}",
+        matches as f64 / compressed_data.len() as f64
+    );
 
     // let mut current_hash: u32 = 0;
     // let mut current_bytes: Vec<u8>;
-    
     // for i in compressed_data.iter() {
     //     current_bytes = vec![0; block_size];
-    //     hasher = FnvHasher::default();
-    //     hasher.write(current_bytes.as_slice());
-    //     current_hash = hasher.finish();
+    //     hasher = Hasher::new();
+    //     hasher.update(current_bytes.as_slice());
+    //     current_hash = hasher.finalize();
     //     while *i != current_hash {
     //         increment_byte_vector(&mut current_bytes);
-    //         hasher = FnvHasher::default();
-    //         hasher.write(current_bytes.as_slice());
-    //         current_hash = hasher.finish();
+    //         hasher = Hasher::default();
+    //         hasher.update(current_bytes.as_slice());
+    //         current_hash = hasher.finalize();
     //         // println!("Hash: {}", current_hash);
     //         // println!("Bytes: {:?}", current_bytes);
     //     }
     //     println!("{:?}", current_bytes);
     //     decompressed_data.append(&mut current_bytes);
     // }
+
     decompressed_data
 }
 
-fn increment_byte_vector(vector: &mut Vec<u8>) -> bool{
+fn increment_byte_vector(vector: &mut Vec<u8>) -> bool {
     let mut carry = true;
     let mut i = 0;
-    let mut cmp: i16 = 0;
-    let mut status = true;
-    while carry {
-        cmp = match vector.get(i){
-                Some(value) => *value as i16,
-                None => -1
-        };
-        if cmp < 0{
-            carry = false;
-            status = false;
+    {
+        let mut will_overflow: bool = true;
+        for i in vector.iter() {
+            if *i != 255 {
+                will_overflow = false;
+            }
         }
-        else if (cmp == 255) && carry {
+        if will_overflow == true {
+            return false;
+        }
+    }
+
+    while carry {
+        if (vector[i] == 255) && carry {
             vector[i] = 0;
         } else {
             vector[i] += 1;
@@ -71,7 +81,7 @@ fn increment_byte_vector(vector: &mut Vec<u8>) -> bool{
         }
         i += 1;
     }
-    status
+    true
 }
 
 fn generate_random_byte_vector(size: usize) -> Vec<u8> {
