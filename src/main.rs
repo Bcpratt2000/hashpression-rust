@@ -5,22 +5,19 @@ pub mod file_io;
 use bincode;
 
 fn main() {
-    let FILE_NAME = "testFile";
+    let FILE_NAME = "testFile.hps";
     let BLOCK_SIZE = 3;
-
-    let mut compressed_vector: Vec<u32> = Vec::new();
     {
-        let mut s: Vec<u8> = "Ben Pratt".as_bytes().to_vec();
+        let mut to_compress: Vec<u8> = file_io::read_from_file("English.txt");
 
-        compressed_vector = compress::compress(BLOCK_SIZE, &mut s);
-        file_io::write_to_file_serialized(&compressed_vector, FILE_NAME)
+        let compressed: Vec<u32> = compress::compress(BLOCK_SIZE, &mut to_compress);
+
+        file_io::write_to_file_serialized(&compressed, FILE_NAME);
     }
-    let deserialized = file_io::read_from_file_deserialized(FILE_NAME);
 
-    assert_eq!(deserialized, compressed_vector);
+    let from_file = file_io::read_from_file_deserialized(FILE_NAME);
 
-    println!(
-        "{}",
-        String::from_utf8_lossy(decompress::decompress(&deserialized, BLOCK_SIZE).as_slice())
-    );
+    let decompressed = decompress::decompress(&from_file, BLOCK_SIZE);
+
+    println!("{}", String::from_utf8_lossy(&decompressed));
 }
