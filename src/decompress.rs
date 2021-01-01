@@ -2,6 +2,7 @@ use crc32fast::Hasher;
 use rand::Rng;
 use std::{thread::current, vec};
 
+#[inline]
 pub fn decompress(compressed_data: &Vec<u32>, block_size: usize) -> Vec<u8> {
     let mut hasher: Hasher;
 
@@ -21,7 +22,6 @@ pub fn decompress(compressed_data: &Vec<u32>, block_size: usize) -> Vec<u8> {
                 for ii in 0..block_size {
                     decompressed_data[(i * block_size) + ii] = current_bytes[ii];
                 }
-                // println!("{:?}", current_bytes);
                 matches += 1;
             }
         }

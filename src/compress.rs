@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crc32fast::Hasher;
 
 
@@ -27,4 +29,22 @@ pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
         to_ret.push(hasher.finalize());
     }
     to_ret
+}
+
+
+pub fn generate_char_bitmask(input: &Vec<u8>) -> Vec<u8>{
+    let mut tracker: [usize; 256] = [0; 256];
+
+    for i in input.iter(){
+        tracker[*i as usize]+=1;
+    }
+
+    let mut ret_vec: Vec<u8> = vec!(0; 32);
+
+    for i in 0..255{
+        if tracker[i] != 0{
+            ret_vec[i/32] += (1 <<i%32);
+        }
+    }
+    ret_vec
 }
