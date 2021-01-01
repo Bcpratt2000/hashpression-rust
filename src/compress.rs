@@ -12,8 +12,11 @@ pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
     }
 
     //declare vairables
-    let mut to_ret: Vec<u32> = Vec::new();
+    let mut to_ret: Vec<u32> = Vec::with_capacity(32+(input_vector.len()/block_size));
     let mut hasher;
+
+    //prepend byte bitmask
+
 
     for i in 0..(input_vector.len() / block_size) {
         //initalize hasher every loop because hasher.finish() does not clear it
@@ -41,9 +44,9 @@ pub fn generate_char_bitmask(input: &Vec<u8>) -> Vec<u8>{
 
     let mut ret_vec: Vec<u8> = vec!(0; 32);
 
-    for i in 0..255{
+    for i in 0..256{
         if tracker[i] != 0{
-            ret_vec[i/32] += (1 <<i%32);
+            ret_vec[i/8] += (1 <<i%8);
         }
     }
     ret_vec
