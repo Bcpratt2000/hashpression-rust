@@ -1,6 +1,5 @@
 use crc32fast::Hasher;
 use rand::Rng;
-use std::{thread::current, vec};
 
 #[inline]
 pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> {
@@ -16,8 +15,12 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
     let mut matches: usize = 0; //only here to chech if there are collisions
     let mut current_hash: u32 = 0;
     let mut current_bytes: Vec<u8> = vec![0; block_size];
+    let mut current_byte_tracker: Vec<u8> = vec![0; block_size];
     loop {
         hasher = Hasher::new();
+        for i in 0..block_size{
+            current_bytes[i] = byte_list[current_byte_tracker[i] as usize];
+        }
         hasher.update(current_bytes.as_slice());
         current_hash = hasher.finalize();
         for (i, item) in compressed_data.iter().enumerate() {
@@ -28,7 +31,7 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
                 matches += 1;
             }
         }
-        if !increment_byte_vector(&mut current_bytes) {
+        if !increment_byte_vector_max(&mut current_byte_tracker, byte_list.len() as u8) {
             break;
         }
     }
@@ -58,6 +61,33 @@ fn increment_byte_vector(vector: &mut Vec<u8>) -> bool {
 
     while carry {
         if (vector[i] == 255) && carry {
+            vector[i] = 0;
+        } else {
+            vector[i] += 1;
+            carry = false;
+        }
+        i += 1;
+    }
+    true
+}
+
+fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
+    let mut carry = true;
+    let mut i = 0;
+    {
+        let mut will_overflow: bool = true;
+        for i in vector.iter() {
+            if *i != max-1 {
+                will_overflow = false;
+            }
+        }
+        if will_overflow == true {
+            return false;
+        }
+    }
+
+    while carry {
+        if (vector[i] == max-1) && carry {
             vector[i] = 0;
         } else {
             vector[i] += 1;

@@ -6,9 +6,9 @@ use std::time::Instant;
 
 fn main() {
     const FILE_NAME: &str = "testFile.hps";
-    const BLOCK_SIZE: usize = 3;
+    const BLOCK_SIZE: usize = 4;
     {
-        let mut to_compress: Vec<u8> = file_io::read_from_file("English.txt");
+        let mut to_compress: Vec<u8> = file_io::read_from_file("EnglishShortened.txt");
         // let mut to_compress: Vec<u8> = String::from("Hello, world!").into_bytes();
 
         let compressed: Vec<u32> = compress::compress(BLOCK_SIZE, &mut to_compress);

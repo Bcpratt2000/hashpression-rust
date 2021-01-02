@@ -6,7 +6,7 @@ pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
     //pad end with spaces to be divisible by block_size
     if input_vector.len() % block_size != 0 {
         for _ in 0..block_size - (input_vector.len() % block_size) {
-            input_vector.push(32);
+            input_vector.push(0);
         }
     }
 
