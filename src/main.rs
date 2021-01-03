@@ -20,7 +20,7 @@ fn main() {
 
     let start = Instant::now();
     let decompressed = decompress::decompress(&mut from_file, BLOCK_SIZE);
-    println!("Seconds to decompress: {}", start.elapsed().as_millis() as f64/1000 as f64);
+    println!("Seconds to decompress: {}\n", start.elapsed().as_millis() as f64/1000 as f64);
 
     println!("{}", String::from_utf8_lossy(&decompressed));
 }

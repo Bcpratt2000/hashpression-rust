@@ -7,18 +7,21 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
 
     //strip and process bitmask
     let byte_list = process_char_bitmask(&compressed_data.drain(0..8).as_slice().to_vec());
-    println!("{:?}", byte_list);
-    println!("{}", byte_list.len());
+    println!("Number of unique bytes: {}", byte_list.len());
 
+    //strip and save file checksum
+    let checksum = compressed_data.drain(0..1).as_slice().to_vec();
+
+    //allocate space for decompressed information
     let mut decompressed_data: Vec<u8> = vec![0; block_size * compressed_data.len()];
 
-    let mut matches: usize = 0; //only here to chech if there are collisions
+    let mut matches: usize = 0; //here to check for are collisions
     let mut current_hash: u32 = 0;
     let mut current_bytes: Vec<u8> = vec![0; block_size];
     let mut current_byte_tracker: Vec<u8> = vec![0; block_size];
     loop {
         hasher = Hasher::new();
-        for i in 0..block_size{
+        for i in 0..block_size {
             current_bytes[i] = byte_list[current_byte_tracker[i] as usize];
         }
         hasher.update(current_bytes.as_slice());
@@ -77,7 +80,7 @@ fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
     {
         let mut will_overflow: bool = true;
         for i in vector.iter() {
-            if *i != max-1 {
+            if *i != max - 1 {
                 will_overflow = false;
             }
         }
@@ -87,7 +90,7 @@ fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
     }
 
     while carry {
-        if (vector[i] == max-1) && carry {
+        if (vector[i] == max - 1) && carry {
             vector[i] = 0;
         } else {
             vector[i] += 1;
@@ -116,7 +119,7 @@ fn process_char_bitmask(bitmask: &Vec<u32>) -> Vec<u8> {
     for (i, item) in bitmask.iter().enumerate() {
         for bit in 0..32 {
             if (*item & (1 << bit)) != 0 {
-                to_ret.push(((i*32)+bit) as u8);
+                to_ret.push(((i * 32) + bit) as u8);
             }
         }
     }
