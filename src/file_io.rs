@@ -1,4 +1,4 @@
-use bincode::{self, serialize};
+use bincode;
 use std::fs::File;
 use std::io::prelude::*;
 

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crc32fast::Hasher;
 
 pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {

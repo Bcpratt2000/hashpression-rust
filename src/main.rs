@@ -23,10 +23,4 @@ fn main() {
     println!("Seconds to decompress: {}", start.elapsed().as_millis() as f64/1000 as f64);
 
     println!("{}", String::from_utf8_lossy(&decompressed));
-
-    let mut to_compress: Vec<u8> = String::from("~").into_bytes();
-
-    // let bleh = compress::generate_char_bitmask(&to_compress);
-    // println!("{:?}", bleh);
-
 }
