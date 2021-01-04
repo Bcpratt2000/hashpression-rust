@@ -16,19 +16,20 @@ pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
     }
 
     //declare vairables
-    let mut to_ret: Vec<u32> = Vec::with_capacity(32 + (input_vector.len() / block_size));
+    let mut to_ret: Vec<u32> = Vec::with_capacity(38 + (input_vector.len() / block_size));
     let mut hasher;
 
     {
+        let mut checksum: Hasher = Hasher::new();
+        checksum.update(input_vector);
+
         //prepend byte bitmask
         let char_bitmask = generate_char_bitmask(&input_vector);
         for i in char_bitmask {
             to_ret.push(i);
         }
 
-        //prepend file checksum after byte mask
-        let mut checksum: Hasher = Hasher::new();
-        checksum.update(input_vector);
+        //prepend file checksum after byte mask, this is calculated after padding is added
         to_ret.push(checksum.finalize());
     }
 

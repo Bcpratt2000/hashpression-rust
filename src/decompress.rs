@@ -1,5 +1,4 @@
 use crc32fast::Hasher;
-use rand::Rng;
 
 #[inline]
 pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> {
@@ -10,12 +9,13 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
     println!("Number of unique bytes: {}", byte_list.len());
 
     //strip and save file checksum
-    let checksum = compressed_data.drain(0..1).as_slice().to_vec();
+    let checksum = compressed_data.drain(0..1).as_slice()[0];
+    // println!("{}", checksum);
 
     //allocate space for decompressed information
     let mut decompressed_data: Vec<u8> = vec![0; block_size * compressed_data.len()];
 
-    let mut matches: usize = 0; //here to check for are collisions
+    let mut matches: usize = 0; //here to check for collisions
     let mut current_hash: u32 = 0;
     let mut current_bytes: Vec<u8> = vec![0; block_size];
     let mut current_byte_tracker: Vec<u8> = vec![0; block_size];
@@ -34,7 +34,19 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
                 matches += 1;
             }
         }
+
+        if matches >= compressed_data.len() {
+            // println!("Trying checksum");
+            hasher = Hasher::new();
+            hasher.update(decompressed_data.as_slice());
+            if checksum == hasher.finalize(){
+                break;
+            }
+        }
         if !increment_byte_vector_max(&mut current_byte_tracker, byte_list.len() as u8) {
+            hasher = Hasher::new();
+            hasher.update(decompressed_data.as_slice());
+            println!("Unable to decompress accurately");
             break;
         }
     }
@@ -43,6 +55,7 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
         "Avg matches per hash: {}",
         matches as f64 / compressed_data.len() as f64
     );
+    println!("{} {}", matches, compressed_data.len());
 
     decompressed_data
 }
@@ -99,16 +112,6 @@ fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
         i += 1;
     }
     true
-}
-
-fn generate_random_byte_vector(size: usize) -> Vec<u8> {
-    let mut to_ret = Vec::with_capacity(size);
-    let mut rng = rand::thread_rng();
-
-    for _ in 0..size {
-        to_ret.push(rng.gen::<u8>());
-    }
-    to_ret
 }
 
 fn process_char_bitmask(bitmask: &Vec<u32>) -> Vec<u8> {
