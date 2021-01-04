@@ -16,7 +16,7 @@ pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
     }
 
     //declare vairables
-    let mut to_ret: Vec<u32> = Vec::with_capacity(38 + (input_vector.len() / block_size));
+    let mut to_ret: Vec<u32> = Vec::with_capacity(100 + (input_vector.len() / block_size));
     let mut hasher;
 
     {

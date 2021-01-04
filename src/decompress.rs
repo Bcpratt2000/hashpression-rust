@@ -36,10 +36,10 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
         }
 
         if matches >= compressed_data.len() {
-            // println!("Trying checksum");
             hasher = Hasher::new();
             hasher.update(decompressed_data.as_slice());
             if checksum == hasher.finalize(){
+                println!("Checksum Matched!");
                 break;
             }
         }
@@ -111,6 +111,7 @@ fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
         }
         i += 1;
     }
+    println!("{:?}", vector);
     true
 }
 
