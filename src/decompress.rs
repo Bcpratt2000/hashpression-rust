@@ -111,7 +111,7 @@ fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
         }
         i += 1;
     }
-    println!("{:?}", vector);
+    // println!("{:?}", vector);
     true
 }
 
