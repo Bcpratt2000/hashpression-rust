@@ -1,4 +1,7 @@
 use crc32fast::Hasher;
+use std::collections::HashMap;
+use std::time::Instant;
+use std::mem;
 
 #[inline]
 pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> {
@@ -14,6 +17,10 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
 
     //allocate space for decompressed information
     let mut decompressed_data: Vec<u8> = vec![0; block_size * compressed_data.len()];
+    
+    let start = Instant::now();
+    let hashmap = hashmap_from_vector(&compressed_data, block_size, byte_list.len());
+    // drop(compressed_data);
 
     let mut matches: usize = 0; //here to check for collisions
     let mut current_hash: u32 = 0;
@@ -21,11 +28,15 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
     let mut current_byte_tracker: Vec<u8> = vec![0; block_size];
     loop {
         hasher = Hasher::new();
+
+        // generate current byte list using the indecies tracked in current_byte_tracker
         for i in 0..block_size {
-            current_bytes[i] = byte_list[current_byte_tracker[i] as usize];
+            current_bytes[i] = byte_list[current_byte_tracker[i] as usize]; 
         }
+
         hasher.update(current_bytes.as_slice());
         current_hash = hasher.finalize();
+
         for (i, item) in compressed_data.iter().enumerate() {
             if current_hash == *item {
                 for ii in 0..block_size {
@@ -58,6 +69,19 @@ pub fn decompress(compressed_data: &mut Vec<u32>, block_size: usize) -> Vec<u8> 
     println!("{} {}", matches, compressed_data.len());
 
     decompressed_data
+}
+
+fn hashmap_from_vector(vector: &Vec<u32>, block_size: usize, byte_amount: usize) -> HashMap<u32, Vec<usize>>{
+    let mut hashmap: HashMap<u32, Vec<usize>> = HashMap::with_capacity(byte_amount.pow(block_size as u32));
+
+    for (i, item) in vector.iter().enumerate(){
+        if hashmap.contains_key(item){
+            hashmap.get_mut(item).unwrap().push(i);
+        } else{
+            hashmap.insert(*item, vec!(i));
+        }
+    }
+    hashmap
 }
 
 fn increment_byte_vector(vector: &mut Vec<u8>) -> bool {

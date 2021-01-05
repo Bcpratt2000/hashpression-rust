@@ -22,7 +22,7 @@ fn main() {
     let decompressed = decompress::decompress(&mut from_file, BLOCK_SIZE);
     println!("Seconds to decompress: {}\n", start.elapsed().as_millis() as f64/1000 as f64);
 
-    // file_io::write_vec8_to_file(&decompressed, "testFile.mp4");
+    file_io::write_vec8_to_file(&decompressed, "testFile.mp4");
 
     // println!("{}", String::from_utf8_lossy(&decompressed));
 }
