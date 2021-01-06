@@ -117,7 +117,6 @@ fn increment_byte_vector(vector: &mut Vec<u8>) -> bool {
 }
 
 fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
-<<<<<<< HEAD
     let mut carry = true;
     let mut i = 0;
     {
@@ -143,33 +142,6 @@ fn increment_byte_vector_max(vector: &mut Vec<u8>, max: u8) -> bool {
     }
     // println!("{:?}", vector);
     true
-=======
-	let mut carry = true;
-	let mut i = 0;
-	{
-		let mut will_overflow: bool = true;
-		for i in vector.iter() {
-			if *i != max - 1 {
-				will_overflow = false;
-			}
-		}
-		if will_overflow == true {
-			return false;
-		}
-	}
-
-	while carry {
-		if (vector[i] == max - 1) && carry {
-			vector[i] = 0;
-		} else {
-			vector[i] += 1;
-			carry = false;
-		}
-		i += 1;
-	}
-	// println!("{:?}", vector);
-	true
->>>>>>> hashmap
 }
 
 fn process_char_bitmask(bitmask: &Vec<u32>) -> Vec<u8> {
