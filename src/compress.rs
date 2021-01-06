@@ -6,7 +6,6 @@ bytes 0..31   = bitmask of used bytes in the original file
 bytes 32..36  = crc32 hash of the original file
 bytes 37..end = crc32 hashed data in 4 byte segments
 */
-
 pub fn compress(block_size: usize, input_vector: &mut Vec<u8>) -> Vec<u32> {
     //pad end with spaces to be divisible by block_size
     if input_vector.len() % block_size != 0 {

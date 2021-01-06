@@ -2,7 +2,6 @@ use bincode;
 use std::fs::File;
 use std::io::prelude::*;
 
-
 pub fn read_from_file(file: &str) -> Vec<u8> {
     let mut file: File = File::open(file).unwrap();
     let mut buf: Vec<u8> = Vec::with_capacity(file.metadata().unwrap().len() as usize);
